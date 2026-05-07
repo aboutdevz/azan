@@ -3,32 +3,32 @@
     "azans": [
       {
         "name": "subuh",
-        "file": "media/3.mp3",
+        "file": "media/subuh.wav",
         "enabled": true
       },
       {
         "name": "dhuha",
-        "file": "media/4.mp3",
-        "enabled": true
+        "file": "media/4.wav",
+        "enabled": false
       },
       {
         "name": "dzuhur",
-        "file": "media/3.mp3",
+        "file": "media/dzuhr.wav",
         "enabled": true
       },
       {
         "name": "ashar",
-        "file": "media/4.mp3",
+        "file": "media/ashar.wav",
         "enabled": true
       },
       {
         "name": "maghrib",
-        "file": "media/3.mp3",
+        "file": "media/maghrib.wav",
         "enabled": true
       },
       {
         "name": "isya",
-        "file": "media/4.mp3",
+        "file": "media/isya.wav",
         "enabled": true
       }
     ]

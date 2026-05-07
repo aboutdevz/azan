@@ -3,6 +3,7 @@ import isEqual from "lodash.isequal";
 import path from "path";
 import soundPlay from "sound-play";
 import cron from "node-cron";
+import { setTimeout } from "timers/promises";
 
 interface PrayerTimesDialy {
   tanggal: string;
@@ -48,6 +49,9 @@ interface Metadata {
 const metadata = JSON.parse(readFileSync("metadata.json", "utf-8")) as Metadata;
 const baseApiUrl = "https://api.myquran.com/v3";
 const jakartaId = "58a2fc6ed39fd083f55d4182bf88826d";
+const args = process.argv.slice(2);
+
+console.log(args);
 
 // --- State Trackers ---
 const playedToday = new Set<string>();
@@ -109,6 +113,7 @@ const playAzan = async (prayerName: string): Promise<void> => {
 
   try {
     const exactFilePath = path.join(process.cwd(), "src", azan.file);
+    console.log(exactFilePath);
     await soundPlay.play(exactFilePath);
     console.log(`Azan for ${prayerName} played successfully.`);
     logging(`Successfully played audio for: ${prayerName}`);
@@ -174,7 +179,9 @@ const checkAndPlayAzan = async () => {
       playedToday.add(prayerName);
 
       try {
+        await setTimeout(1000); // Small delay to ensure any file locks are released
         await playAzan(prayerName);
+        await setTimeout(2000); // Wait a bit after playing before allowing next actions
       } catch (error) {
         // If it fails (e.g. file error), remove it from the list so it can try again next minute
         playedToday.delete(prayerName);
@@ -189,13 +196,12 @@ const testSuite = async () => {
     await updateSchedule();
     console.log("updateSchedule test completed.");
 
-    await playAzan("dhuha");
+    await setTimeout(1000);
+    await playAzan("dzuhur");
     console.log("playAzan test completed.");
-
-    process.exit(0);
+    await setTimeout(3000);
   } catch (error) {
     console.error("Test suite failed:", error);
-    process.exit(1);
   }
 };
 
@@ -222,5 +228,9 @@ function main() {
   );
 }
 
-// Start the actual background process instead of the test suite
-main();
+if (args.includes("test")) {
+  testSuite();
+} else {
+  // Start the actual background process instead of the test suite
+  main();
+}

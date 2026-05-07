@@ -3,9 +3,12 @@ import isEqual from "lodash.isequal";
 import path from "path";
 import soundPlay from "sound-play";
 import cron from "node-cron";
+import { setTimeout } from "timers/promises";
 const metadata = JSON.parse(readFileSync("metadata.json", "utf-8"));
 const baseApiUrl = "https://api.myquran.com/v3";
 const jakartaId = "58a2fc6ed39fd083f55d4182bf88826d";
+const args = process.argv.slice(2);
+console.log(args);
 // --- State Trackers ---
 const playedToday = new Set();
 let currentDayTracker = new Date().getDate();
@@ -54,6 +57,7 @@ const playAzan = async (prayerName) => {
     console.log(`Now playing: ${prayerName}...`);
     try {
         const exactFilePath = path.join(process.cwd(), "src", azan.file);
+        console.log(exactFilePath);
         await soundPlay.play(exactFilePath);
         console.log(`Azan for ${prayerName} played successfully.`);
         logging(`Successfully played audio for: ${prayerName}`);
@@ -108,7 +112,9 @@ const checkAndPlayAzan = async () => {
             // Mark as played immediately so it doesn't trigger again in the next minute
             playedToday.add(prayerName);
             try {
+                await setTimeout(1000); // Small delay to ensure any file locks are released
                 await playAzan(prayerName);
+                await setTimeout(2000); // Wait a bit after playing before allowing next actions
             }
             catch (error) {
                 // If it fails (e.g. file error), remove it from the list so it can try again next minute
@@ -122,13 +128,13 @@ const testSuite = async () => {
         console.log("Running test suite...");
         await updateSchedule();
         console.log("updateSchedule test completed.");
-        await playAzan("dhuha");
+        await setTimeout(1000);
+        await playAzan("dzuhur");
         console.log("playAzan test completed.");
-        process.exit(0);
+        await setTimeout(3000);
     }
     catch (error) {
         console.error("Test suite failed:", error);
-        process.exit(1);
     }
 };
 function main() {
@@ -147,6 +153,11 @@ function main() {
     });
     console.log("🕌 Scheduler is running in the background. Keep this terminal open!");
 }
-// Start the actual background process instead of the test suite
-main();
+if (args.includes("test")) {
+    testSuite();
+}
+else {
+    // Start the actual background process instead of the test suite
+    main();
+}
 //# sourceMappingURL=app.js.map

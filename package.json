@@ -6,7 +6,8 @@
   "main": "app.ts",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "test": "node dist/app.js test"
   },
   "keywords": [],
   "author": "",
