@@ -5,6 +5,12 @@ import soundPlay from "sound-play";
 import cron from "node-cron";
 import { setTimeout } from "timers/promises";
 
+import os from "os";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
+
 interface PrayerTimesDialy {
   tanggal: string;
   imsak: string;
@@ -114,7 +120,12 @@ const playAzan = async (prayerName: string): Promise<void> => {
   try {
     const exactFilePath = path.join(process.cwd(), "src", azan.file);
     console.log(exactFilePath);
-    await soundPlay.play(exactFilePath);
+
+    if (os.platform() === "win32") {
+      await soundPlay.play(exactFilePath);
+    } else {
+      await execAsync(`mplayer "${exactFilePath}"`);
+    }
     console.log(`Azan for ${prayerName} played successfully.`);
     logging(`Successfully played audio for: ${prayerName}`);
   } catch (err) {

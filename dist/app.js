@@ -4,6 +4,10 @@ import path from "path";
 import soundPlay from "sound-play";
 import cron from "node-cron";
 import { setTimeout } from "timers/promises";
+import os from "os";
+import { exec } from "child_process";
+import { promisify } from "util";
+const execAsync = promisify(exec);
 const metadata = JSON.parse(readFileSync("metadata.json", "utf-8"));
 const baseApiUrl = "https://api.myquran.com/v3";
 const jakartaId = "58a2fc6ed39fd083f55d4182bf88826d";
@@ -58,7 +62,12 @@ const playAzan = async (prayerName) => {
     try {
         const exactFilePath = path.join(process.cwd(), "src", azan.file);
         console.log(exactFilePath);
-        await soundPlay.play(exactFilePath);
+        if (os.platform() === "win32") {
+            await soundPlay.play(exactFilePath);
+        }
+        else {
+            await execAsync(`mplayer "${exactFilePath}"`);
+        }
         console.log(`Azan for ${prayerName} played successfully.`);
         logging(`Successfully played audio for: ${prayerName}`);
     }
